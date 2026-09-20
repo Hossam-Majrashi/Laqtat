@@ -1,0 +1,110 @@
+================================================================================
+مشروع: لقطات (Laqtat) — Video Frame Grid App
+المطور: حسام حسن مجرشي (Hossam Majrashi)
+الموقع الشخصي: https://hossam-majrashi.github.io/Works/
+البريد الإلكتروني: Hossam.Majrashi@gmail.com
+================================================================================
+
+--------------------------------------------------------------------------------
+[1] القسم العربي (Arabic Section) — مناسب للسيرة الذاتية ومعرض الأعمال
+--------------------------------------------------------------------------------
+
+• اسم المشروع:
+  لقطات (Laqtat)
+
+• التصنيف:
+  تطبيق متعدد المنصات (Cross-Platform Application) — سطح المكتب، الهواتف، والويب.
+
+• نبذة تعريفية سريعة (Elevator Pitch):
+  تطبيق مفتوح المصدر وحديث يعمل بدون اتصال بالإنترنت، يستخرج تلقائياً 8 لقطات مميزة
+  وموزعة زمنياً عبر مقطع الفيديو ويدمجها في شبكة صور 4×2 فائقة الجمال وبدقة عالية
+  جاهزة للتصدير والمشاركة بخصوصية تامة 100%.
+
+• المشكلة والحل (Problem & Solution):
+  - التحدي: تلخيص مقاطع الفيديو أو اختيار لقطات بارزة منها يتطلب عادةً وقتاً طويلاً
+    في التقاط الصور يدوياً، بينما تعتمد الأدوات السحابية على رفع الفيديو لخوادم خارجية
+    مما يستهلك البيانات وينتهك خصوصية المستخدم.
+  - الحل التقني: بناء نظام معالجة محلي بالكامل يستخرج الإطارات ويجمعها تلقائياً
+    في شبكة موحدة دون أن يغادر الفيديو جهاز المستخدم نهائياً، مع دعم السحب والإفلات.
+
+• أبرز الإنجازات والمميزات التقنية (Key Technical Highlights):
+  1. معالجة وسائط محلية مستقلة 100% (Offline-First Architecture):
+     - انعدام أي طلبات شبكية أو تتبع أو رفع للبيانات؛ جميع عمليات فك وتوليد الإطارات
+       تتم محلياً بالكامل على الجهاز.
+  2. بنية هجينة مرنة لاستخراج الإطارات حسب المنصة (Platform-Adaptive Extraction):
+     - أنظمة لينكس: تنفيذ غير متزامن لأداة FFmpeg CLI مع القفز الزمني بالملي ثانية.
+     - متصفحات الويب: استخدام In-memory Blob URLs ومعالجة Offscreen Canvas بواسطة 
+       dart:js_interop لتجاوز قيود أمان المتصفح (Canvas-Tainting).
+     - الهواتف المحمولة: استغلال محركات النظام الأصلية لتوليد الصور المصغرة بتسريع عتادي.
+  3. دعم أكثر من 20 صيغة فيديو:
+     - MP4, MOV, MKV, WebM, AVI, FLV, WMV, TS, OGV, بالإضافة للصيغ الكلاسيكية مثل RM.
+  4. واجهة مستخدم متكيفة بالكامل (Adaptive Multi-Platform UI):
+     - تصميم تجارب مستخدم مخصصة ومستقلة تناسب طبيعة كل جهاز (الهاتف، الكمبيوتر، المتصفح).
+     - دعم كامل لاتجاه اليمين لليسار (RTL) للغة العربية، والاتجاه المعاكس (LTR) للإنجليزية.
+     - الوضع الداكن (#212327) والوضع الفاتح (#efeef1).
+  5. أتمتة التوزيع وبناء حزم لينكس (Linux Packaging & CI/CD Tooling):
+     - تطوير سكربتات أتمتة بش (Bash) متقدمة لإنتاج حزم التوزيع لمختلف توزيعات لينكس:
+       (Debian/Ubuntu .deb, Fedora/RHEL .rpm, Arch Linux .pkg.tar.zst, AppImage, و Flatpak).
+     - سكربت أتمتة لتوليد 25 مقاساً قياسياً لأيقونات التطبيق بدقة من 16×16 وحتى 1024×1024.
+
+• حزمة التقنيات المستخدمة (Tech Stack):
+  - لغات البرمجة: Dart, Bash / Shell Scripting, C++ (Runner).
+  - إطار العمل: Flutter (Multi-Platform: Linux, Android, Web, macOS, Windows, iOS).
+  - معالجة الوسائط: FFmpeg, ImageMagick, package:image.
+  - أنظمة التحزيم: Flatpak Builder, dpkg, rpmbuild, AppImageTool.
+  - إدارة الحالة والتفضيلات: ListenableBuilder, SharedPreferences, FilePicker, UrlLauncher.
+
+
+--------------------------------------------------------------------------------
+[2] القسم الإنجليزي (English Section) — Ideal for CV, Portfolio & LinkedIn
+--------------------------------------------------------------------------------
+
+• Project Name:
+  Laqtat (لقطات) — Video Frame Grid Compositor
+
+• Category:
+  Cross-Platform Desktop, Mobile & Web Application
+
+• Summary:
+  A modern, privacy-focused open-source application built with Flutter that extracts 
+  8 evenly distributed keyframes from video files and seamlessly arranges them into an 
+  elegant 4×2 grid image—100% offline with zero telemetry.
+
+• Problem & Technical Solution:
+  - Challenge: Manually taking screenshots across a video for previews or summaries is 
+    tedious, while online web converters require uploading media to remote servers, 
+    compromising privacy and bandwidth.
+  - Solution: Developed a high-performance, fully offline video compositor that parses 
+    videos locally, extracts timestamped keyframes, and compiles high-res 4×2 grids in 
+    seconds with drag-and-drop workflow.
+
+• Core Engineering Highlights:
+  1. 100% Offline & Zero-Telemetry Architecture:
+     - Zero external network requests, analytics, or cloud uploads; all decoding and 
+       compositing remain strictly sandboxed on the local machine.
+  2. Multi-Tier Media Extraction Strategy:
+     - Linux Desktop: Leveraged system FFmpeg via asynchronous sub-second seeking 
+       process pipelines (-ss <timestamp> -i <video> -frames:v 1).
+     - Modern Web: Bypassed browser canvas-tainting security policies by implementing 
+       in-memory Blob URLs and offscreen Canvas frame capture via dart:js_interop / package:web.
+     - Mobile (Android/iOS): Utilized platform-native hardware-accelerated thumbnailing 
+       without degrading UI thread responsiveness.
+  3. 20+ Video Format Compatibility:
+     - Broad compatibility supporting MP4, MOV, MKV, WebM, AVI, FLV, WMV, TS, OGV, 
+       and legacy formats like RealMedia (.rm/.ram).
+  4. Adaptive Platform-Specific UI/UX:
+     - Dedicated responsive views for Mobile, Desktop, and Web.
+     - Full bidirectional localization: Arabic-first (RTL) & English (LTR).
+     - Curated Dark Mode (#212327) and Light Mode (#efeef1).
+  5. Automated Linux Packaging Pipeline:
+     - Authored production-ready shell automation generating release bundles for all 
+       major Linux distributions (.deb, .rpm, Arch .pkg.tar.zst, AppImage, and Flatpak).
+     - Automated batch icon rasterization across 25 standard resolution targets (16x16 to 1024x1024).
+
+• Technologies & Tools:
+  - Languages: Dart, Bash, C++
+  - Framework: Flutter (Multi-Platform: Linux, Android, Web, macOS, Windows, iOS)
+  - Processing: FFmpeg, ImageMagick, package:image
+  - Packaging: Flatpak, Deb, RPM, Arch Linux package tools, AppImage
+  - State & Persistence: ListenableBuilder, SharedPreferences, FilePicker, UrlLauncher
+================================================================================
