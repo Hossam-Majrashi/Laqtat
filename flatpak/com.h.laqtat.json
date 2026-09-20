@@ -1,0 +1,50 @@
+{
+  "app-id": "com.h.laqtat",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "24.08",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "laqtat",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=fallback-x11",
+    "--socket=wayland",
+    "--socket=x11",
+    "--socket=pulseaudio",
+    "--device=dri",
+    "--filesystem=host",
+    "--filesystem=home"
+  ],
+  "modules": [
+    {
+      "name": "laqtat",
+      "buildsystem": "simple",
+      "build-commands": [
+        "mkdir -p /app/bin /app/lib/laqtat /app/share/applications /app/share/icons/hicolor/512x512/apps /app/share/metainfo",
+        "cp -r * /app/lib/laqtat/",
+        "ln -s /app/lib/laqtat/laqtat /app/bin/laqtat",
+        "install -D -m 644 com.h.laqtat.desktop /app/share/applications/com.h.laqtat.desktop",
+        "install -D -m 644 com.h.laqtat.metainfo.xml /app/share/metainfo/com.h.laqtat.metainfo.xml",
+        "install -D -m 644 icon.png /app/share/icons/hicolor/512x512/apps/com.h.laqtat.png"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "build/linux/x64/release/bundle"
+        },
+        {
+          "type": "file",
+          "path": "flatpak/com.h.laqtat.desktop"
+        },
+        {
+          "type": "file",
+          "path": "flatpak/com.h.laqtat.metainfo.xml"
+        },
+        {
+          "type": "file",
+          "path": "assets/icons/export_512x512.png",
+          "dest-filename": "icon.png"
+        }
+      ]
+    }
+  ]
+}

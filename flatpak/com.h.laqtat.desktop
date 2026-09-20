@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=لقطات (Laqtat)
+GenericName=Video Frame Grid Extractor
+Comment=Extract 8 frames from video and compose a 4x2 grid image offline
+Exec=laqtat
+Icon=com.h.laqtat
+Terminal=false
+Type=Application
+Categories=Graphics;Video;AudioVideo;Utility;
+StartupWMClass=laqtat

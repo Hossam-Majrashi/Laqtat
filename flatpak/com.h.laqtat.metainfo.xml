@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.h.laqtat</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>لقطات (Laqtat)</name>
+  <summary>Cross-platform video frame grid extractor and compositor</summary>
+  <description>
+    <p>لقطات (Laqtat) extracts 8 keyframes from video files and composes them into an elegant 4x2 grid image offline.</p>
+  </description>
+  <launchable type="desktop-id">com.h.laqtat.desktop</launchable>
+  <provides>
+    <binary>laqtat</binary>
+  </provides>
+</component>
