@@ -58,5 +58,8 @@
   "close": "Close",
   "save": "Save",
   "copy": "Copy",
-  "errorLoadingVideo": "This video could not be read. Please try another video."
+  "errorLoadingVideo": "This video could not be read. Please try another video.",
+  "developer": "Developer",
+  "email": "Email",
+  "website": "Website"
 }

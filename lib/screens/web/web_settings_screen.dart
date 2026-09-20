@@ -4,6 +4,7 @@ import '../../models/app_language.dart';
 import '../../services/settings_service.dart';
 import '../../services/project_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/developer_section.dart';
 
 class WebSettingsScreen extends StatelessWidget {
   final SettingsService settingsService;
@@ -181,6 +182,10 @@ class WebSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 24),
+
+                  // Developer Section
+                  const DeveloperSection(),
                   const SizedBox(height: 24),
 
                   // Clear all data

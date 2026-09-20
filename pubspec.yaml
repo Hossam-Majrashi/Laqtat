@@ -46,6 +46,7 @@ dependencies:
   fc_native_video_thumbnail: ^3.0.1
   video_player: ^2.14.0
   gal: ^2.3.3
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

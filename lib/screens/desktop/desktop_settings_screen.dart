@@ -5,6 +5,7 @@ import '../../models/app_language.dart';
 import '../../services/settings_service.dart';
 import '../../services/project_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/developer_section.dart';
 
 class DesktopSettingsScreen extends StatelessWidget {
   final SettingsService settingsService;
@@ -229,6 +230,10 @@ class DesktopSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 28),
+
+                  // Developer Section
+                  const DeveloperSection(),
                   const SizedBox(height: 28),
 
                   // Clear all data

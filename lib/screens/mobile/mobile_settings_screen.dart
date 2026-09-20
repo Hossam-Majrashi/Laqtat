@@ -6,6 +6,7 @@ import '../../services/settings_service.dart';
 import '../../services/project_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/platform_utils.dart';
+import '../../widgets/developer_section.dart';
 
 class MobileSettingsScreen extends StatelessWidget {
   final SettingsService settingsService;
@@ -147,6 +148,10 @@ class MobileSettingsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 28),
+
+              // Developer Section
+              const DeveloperSection(),
               const SizedBox(height: 28),
 
               // Clear all local data

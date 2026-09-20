@@ -197,4 +197,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorLoadingVideo =>
       'This video could not be read. Please try another video.';
+
+  @override
+  String get developer => 'Developer';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get website => 'Website';
 }
