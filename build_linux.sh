@@ -365,7 +365,10 @@ EOF
 
     if command -v rpmbuild &> /dev/null; then
         RPM_BUILD_DIR="$BUILD_TMP/rpmbuild"
-        mkdir -p "$RPM_BUILD_DIR"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+        mkdir -p "$RPM_BUILD_DIR"/{BUILD,RPMS,SOURCES,SPECS,SRPMS,db}
+        if command -v rpm &> /dev/null; then
+            rpm --initdb --dbpath "$RPM_BUILD_DIR/db" &>/dev/null || :
+        fi
         cat << EOF > "$RPM_BUILD_DIR/SPECS/$APP_NAME.spec"
 Name:           $APP_NAME
 Version:        $VERSION
@@ -409,7 +412,7 @@ fi
 /usr/share/icons/hicolor/512x512/apps/$APP_NAME.png
 EOF
 
-        rpmbuild --define "_topdir $RPM_BUILD_DIR" -bb "$RPM_BUILD_DIR/SPECS/$APP_NAME.spec" > /dev/null
+        rpmbuild --quiet --define "_topdir $RPM_BUILD_DIR" --define "_dbpath $RPM_BUILD_DIR/db" -bb "$RPM_BUILD_DIR/SPECS/$APP_NAME.spec" > /dev/null 2>&1
         find "$RPM_BUILD_DIR/RPMS" -name "*.rpm" -exec cp {} "$DIST_DIR/$RPM_NAME" \;
         echo -e "${GREEN}✓ Created $DIST_DIR/$RPM_NAME${NC}"
     elif command -v fpm &> /dev/null; then

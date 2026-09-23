@@ -150,10 +150,6 @@ class MobileSettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 28),
 
-              // Developer Section
-              const DeveloperSection(),
-              const SizedBox(height: 28),
-
               // Clear all local data
               Card(
                 color: Colors.red.withOpacity(isDark ? 0.12 : 0.06),
@@ -170,6 +166,10 @@ class MobileSettingsScreen extends StatelessWidget {
                   onTap: () => _showClearDataDialog(context, l10n),
                 ),
               ),
+              const SizedBox(height: 28),
+
+              // Developer Section
+              const DeveloperSection(),
               const SizedBox(height: 30),
               Center(
                 child: Text(

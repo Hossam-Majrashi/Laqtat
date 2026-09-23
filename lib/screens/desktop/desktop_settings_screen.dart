@@ -232,10 +232,6 @@ class DesktopSettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 28),
 
-                  // Developer Section
-                  const DeveloperSection(),
-                  const SizedBox(height: 28),
-
                   // Clear all data
                   Card(
                     color: Colors.red.withOpacity(isDark ? 0.12 : 0.06),
@@ -259,6 +255,10 @@ class DesktopSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 28),
+
+                  // Developer Section
+                  const DeveloperSection(),
                 ],
               );
             },

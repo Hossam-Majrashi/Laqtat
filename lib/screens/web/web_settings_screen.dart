@@ -184,10 +184,6 @@ class WebSettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Developer Section
-                  const DeveloperSection(),
-                  const SizedBox(height: 24),
-
                   // Clear all data
                   Card(
                     color: Colors.red.withOpacity(isDark ? 0.12 : 0.06),
@@ -204,6 +200,10 @@ class WebSettingsScreen extends StatelessWidget {
                       onTap: () => _showClearDataDialog(context, l10n),
                     ),
                   ),
+                  const SizedBox(height: 24),
+
+                  // Developer Section
+                  const DeveloperSection(),
                 ],
               );
             },
