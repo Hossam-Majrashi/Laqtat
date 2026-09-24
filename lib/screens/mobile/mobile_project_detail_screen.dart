@@ -26,6 +26,8 @@ class MobileProjectDetailScreen extends StatefulWidget {
 
 class _MobileProjectDetailScreenState extends State<MobileProjectDetailScreen> {
   late Project _project;
+  late int _selectedFrameCount;
+  late String _selectedQuality;
   bool _isProcessing = false;
   String? _statusMessage;
 
@@ -33,20 +35,26 @@ class _MobileProjectDetailScreenState extends State<MobileProjectDetailScreen> {
   void initState() {
     super.initState();
     _project = widget.project;
+    _selectedFrameCount = widget.project.frameCount;
+    _selectedQuality = widget.project.quality;
   }
 
-  Future<void> _regenerate() async {
+  Future<void> _changeFrameCount(int newCount) async {
+    if (newCount == _selectedFrameCount || _isProcessing) return;
     final l10n = AppLocalizations.of(context)!;
     setState(() {
+      _selectedFrameCount = newCount;
       _isProcessing = true;
-      _statusMessage = l10n.processingVideo;
+      _statusMessage = l10n.processingVideo(newCount);
     });
 
     try {
       final updated = await widget.videoGridService.regenerateProject(
         project: _project,
-        quality: widget.settingsService.gridQuality,
+        frameCount: newCount,
+        quality: _selectedQuality,
         exportFormat: widget.settingsService.defaultExportFormat,
+        isNewGenerate: true,
       );
       await widget.projectService.saveProject(updated);
       if (mounted) {
@@ -54,7 +62,47 @@ class _MobileProjectDetailScreenState extends State<MobileProjectDetailScreen> {
           _project = updated;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.framesExtracted)),
+          SnackBar(content: Text(l10n.framesExtracted(newCount))),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.exportFailed}: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _statusMessage = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _regenerate() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isProcessing = true;
+      _statusMessage = l10n.processingVideo(_selectedFrameCount);
+    });
+
+    try {
+      final updated = await widget.videoGridService.regenerateProject(
+        project: _project,
+        frameCount: _selectedFrameCount,
+        quality: _selectedQuality,
+        exportFormat: widget.settingsService.defaultExportFormat,
+        isNewGenerate: false,
+      );
+      await widget.projectService.saveProject(updated);
+      if (mounted) {
+        setState(() {
+          _project = updated;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.framesExtracted(_selectedFrameCount))),
         );
       }
     } catch (e) {
@@ -187,7 +235,7 @@ class _MobileProjectDetailScreenState extends State<MobileProjectDetailScreen> {
                             const CircularProgressIndicator(color: AppTheme.primaryAccent),
                             const SizedBox(height: 16),
                             Text(
-                              _statusMessage ?? l10n.processingVideo,
+                              _statusMessage ?? l10n.processingVideo(_selectedFrameCount),
                               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -241,6 +289,11 @@ class _MobileProjectDetailScreenState extends State<MobileProjectDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  Text(
+                    l10n.framesExtracted(_project.frameCount),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 6),
                   // Timestamps chips
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -260,6 +313,58 @@ class _MobileProjectDetailScreenState extends State<MobileProjectDetailScreen> {
                         );
                       }).toList(),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Frame Count & Grid Quality Selectors
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.frameCount,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            const SizedBox(height: 6),
+                            SegmentedButton<int>(
+                              segments: const [
+                                ButtonSegment(value: 4, label: Text('4')),
+                                ButtonSegment(value: 8, label: Text('8')),
+                                ButtonSegment(value: 16, label: Text('16')),
+                              ],
+                              selected: {_selectedFrameCount},
+                              onSelectionChanged: _isProcessing
+                                  ? null
+                                  : (set) => _changeFrameCount(set.first),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.exportQuality,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            const SizedBox(height: 6),
+                            SegmentedButton<String>(
+                              segments: [
+                                ButtonSegment(value: 'standard', label: Text(l10n.standardQuality.split(' ').first)),
+                                ButtonSegment(value: 'high', label: Text(l10n.highQuality.split(' ').first)),
+                              ],
+                              selected: {_selectedQuality},
+                              onSelectionChanged: (set) {
+                                setState(() => _selectedQuality = set.first);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   // Action Buttons: Regenerate & Export (PNG/JPG)

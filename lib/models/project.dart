@@ -10,6 +10,7 @@ class Project {
   final double durationSeconds;
   final String gridImagePath;
   final List<double> timestamps;
+  final int frameCount;
   final String quality;
   final String exportFormat;
   Uint8List? gridImageBytes;
@@ -24,6 +25,7 @@ class Project {
     required this.durationSeconds,
     required this.gridImagePath,
     required this.timestamps,
+    this.frameCount = 8,
     this.quality = 'standard',
     this.exportFormat = 'png',
     this.gridImageBytes,
@@ -40,6 +42,7 @@ class Project {
       'durationSeconds': durationSeconds,
       'gridImagePath': gridImagePath,
       'timestamps': timestamps,
+      'frameCount': frameCount,
       'quality': quality,
       'exportFormat': exportFormat,
       if (gridImageBytes != null) 'gridImageBase64': base64Encode(gridImageBytes!),
@@ -62,6 +65,13 @@ class Project {
       } catch (_) {}
     }
 
+    final timestamps = (json['timestamps'] as List<dynamic>?)
+            ?.map((e) => (e as num).toDouble())
+            .toList() ??
+        [];
+    final frameCount = (json['frameCount'] as num?)?.toInt() ??
+        (timestamps.isNotEmpty ? timestamps.length : 8);
+
     return Project(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -70,10 +80,8 @@ class Project {
       dateCreated: DateTime.tryParse(json['dateCreated'] as String? ?? '') ?? DateTime.now(),
       durationSeconds: (json['durationSeconds'] as num?)?.toDouble() ?? 0.0,
       gridImagePath: json['gridImagePath'] as String? ?? '',
-      timestamps: (json['timestamps'] as List<dynamic>?)
-              ?.map((e) => (e as num).toDouble())
-              .toList() ??
-          [],
+      timestamps: timestamps,
+      frameCount: frameCount,
       quality: json['quality'] as String? ?? 'standard',
       exportFormat: json['exportFormat'] as String? ?? 'png',
       gridImageBytes: gridBytes,

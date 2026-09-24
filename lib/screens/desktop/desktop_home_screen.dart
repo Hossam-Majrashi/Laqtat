@@ -38,11 +38,12 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
 
       setState(() {
         _isProcessing = true;
-        _statusMessage = l10n.processingVideo;
+        _statusMessage = l10n.processingVideo(widget.settingsService.defaultFrameCount);
       });
 
       final project = await widget.videoGridService.processVideo(
         file: file,
+        frameCount: widget.settingsService.defaultFrameCount,
         quality: widget.settingsService.gridQuality,
         exportFormat: widget.settingsService.defaultExportFormat,
       );
@@ -171,7 +172,7 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                                   const CircularProgressIndicator(color: AppTheme.primaryAccent),
                                   const SizedBox(height: 20),
                                   Text(
-                                    _statusMessage ?? l10n.processingVideo,
+                                    _statusMessage ?? l10n.processingVideo(widget.settingsService.defaultFrameCount),
                                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
                                 ],

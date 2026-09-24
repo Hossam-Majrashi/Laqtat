@@ -8,6 +8,7 @@ class SettingsService extends ChangeNotifier {
   static const String _keyExportFormat = 'export_format';
   static const String _keySaveLocation = 'save_location';
   static const String _keyGridQuality = 'grid_quality';
+  static const String _keyDefaultFrameCount = 'default_frame_count';
 
   final SharedPreferences _prefs;
 
@@ -28,6 +29,8 @@ class SettingsService extends ChangeNotifier {
   String? get defaultSaveLocation => _prefs.getString(_keySaveLocation);
 
   String get gridQuality => _prefs.getString(_keyGridQuality) ?? 'standard';
+
+  int get defaultFrameCount => _prefs.getInt(_keyDefaultFrameCount) ?? 8;
 
   Future<void> setOnboardingComplete(bool complete) async {
     await _prefs.setBool(_keyOnboardingComplete, complete);
@@ -60,6 +63,11 @@ class SettingsService extends ChangeNotifier {
 
   Future<void> setGridQuality(String quality) async {
     await _prefs.setString(_keyGridQuality, quality.toLowerCase());
+    notifyListeners();
+  }
+
+  Future<void> setDefaultFrameCount(int count) async {
+    await _prefs.setInt(_keyDefaultFrameCount, count);
     notifyListeners();
   }
 

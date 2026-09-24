@@ -14,7 +14,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appDescription =>
-      'استخراج 8 لقطات مميزة من أي مقطع فيديو وتجميعها في شبكة صور 4×2 فائقة الجمال وجاهزة للتصدير.';
+      'استخراج لقطات مميزة من أي مقطع فيديو وتجميعها في شبكة صور فائقة الجمال وجاهزة للتصدير.';
 
   @override
   String get next => 'التالي';
@@ -87,6 +87,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get highQuality => 'دقة عالية';
 
   @override
+  String get frameCount => 'عدد اللقطات';
+
+  @override
+  String get defaultFrameCount => 'عدد اللقطات الافتراضي';
+
+  @override
   String get defaultExportFormat => 'صيغة التصدير الافتراضية';
 
   @override
@@ -131,10 +137,21 @@ class AppLocalizationsAr extends AppLocalizations {
       'استورد فيديو لتوليد شبكة اللقطات الأولى الخاصة بك';
 
   @override
-  String get processingVideo => 'جاري استخراج 8 لقطات من الفيديو...';
+  String processingVideo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'جاري استخراج $count لقطة من الفيديو...',
+      many: 'جاري استخراج $count لقطة من الفيديو...',
+      few: 'جاري استخراج $count لقطات من الفيديو...',
+      two: 'جاري استخراج لقطتين من الفيديو...',
+      one: 'جاري استخراج لقطة واحدة من الفيديو...',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String get generatingGrid => 'جاري تركيب شبكة اللقطات 4×2...';
+  String get generatingGrid => 'جاري تركيب شبكة اللقطات...';
 
   @override
   String get exportSuccess => 'تم حفظ الصورة في المعرض بنجاح';
@@ -164,7 +181,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get projectDetails => 'تفاصيل المشروع';
 
   @override
-  String get framesExtracted => 'تم استخراج 8 لقطات';
+  String framesExtracted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم استخراج $count لقطة',
+      many: 'تم استخراج $count لقطة',
+      few: 'تم استخراج $count لقطات',
+      two: 'تم استخراج لقطتين',
+      one: 'تم استخراج لقطة واحدة',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get aboutApp => 'عن لقطات';

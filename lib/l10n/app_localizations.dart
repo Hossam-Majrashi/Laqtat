@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @appDescription.
   ///
   /// In en, this message translates to:
-  /// **'Extract 8 key frames from any video and assemble them into a stunning 4×2 grid image ready to export.'**
+  /// **'Extract key frames from any video and assemble them into a stunning grid image ready to export.'**
   String get appDescription;
 
   /// No description provided for @next.
@@ -248,6 +248,18 @@ abstract class AppLocalizations {
   /// **'High Resolution'**
   String get highQuality;
 
+  /// No description provided for @frameCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Frame Count'**
+  String get frameCount;
+
+  /// No description provided for @defaultFrameCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Frame Count'**
+  String get defaultFrameCount;
+
   /// No description provided for @defaultExportFormat.
   ///
   /// In en, this message translates to:
@@ -329,19 +341,19 @@ abstract class AppLocalizations {
   /// No description provided for @noProjectsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Import a video to generate your first 4×2 frame grid'**
+  /// **'Import a video to generate your first frame grid'**
   String get noProjectsSubtitle;
 
-  /// No description provided for @processingVideo.
+  /// Status message while extracting frames
   ///
   /// In en, this message translates to:
-  /// **'Extracting 8 frames from video...'**
-  String get processingVideo;
+  /// **'{count, plural, =1{Extracting 1 frame from video...} other{Extracting {count} frames from video...}}'**
+  String processingVideo(int count);
 
   /// No description provided for @generatingGrid.
   ///
   /// In en, this message translates to:
-  /// **'Assembling 4×2 grid...'**
+  /// **'Assembling frame grid...'**
   String get generatingGrid;
 
   /// No description provided for @exportSuccess.
@@ -392,11 +404,11 @@ abstract class AppLocalizations {
   /// **'Project Details'**
   String get projectDetails;
 
-  /// No description provided for @framesExtracted.
+  /// Number of frames extracted
   ///
   /// In en, this message translates to:
-  /// **'8 frames extracted'**
-  String get framesExtracted;
+  /// **'{count, plural, =1{1 frame extracted} other{{count} frames extracted}}'**
+  String framesExtracted(int count);
 
   /// No description provided for @aboutApp.
   ///

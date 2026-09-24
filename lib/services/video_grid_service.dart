@@ -51,21 +51,27 @@ class VideoGridService {
     return null;
   }
 
-  List<double> generateTimestamps(double duration, {List<double>? previousTimestamps}) {
+  List<double> generateTimestamps(
+    double duration, {
+    int frameCount = 8,
+    List<double>? previousTimestamps,
+  }) {
     if (duration <= 0) duration = 10.0;
 
-    if (previousTimestamps == null || previousTimestamps.isEmpty) {
-      // Default: evenly spaced (duration / 9 * [1..8])
-      final step = duration / 9.0;
-      return List.generate(8, (i) => (i + 1) * step);
+    if (previousTimestamps == null ||
+        previousTimestamps.isEmpty ||
+        previousTimestamps.length != frameCount) {
+      // Default: evenly spaced (duration / (N + 1) * [1..N])
+      final step = duration / (frameCount + 1.0);
+      return List.generate(frameCount, (i) => (i + 1) * step);
     }
 
-    // Regenerate: sample 8 different timestamps avoiding repeating previous
+    // Regenerate: sample N different timestamps avoiding repeating previous
     final random = Random();
     final newTimestamps = <double>[];
-    final segmentSize = duration / 8.0;
+    final segmentSize = duration / frameCount;
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < frameCount; i++) {
       final segStart = i * segmentSize;
       final prev = previousTimestamps[i];
 
@@ -88,6 +94,7 @@ class VideoGridService {
     required PlatformFile file,
     String quality = 'standard',
     String exportFormat = 'png',
+    int frameCount = 8,
     List<double>? customTimestamps,
   }) async {
     final videoPath = file.path ?? '';
@@ -99,23 +106,25 @@ class VideoGridService {
       videoBytes: videoBytes,
     );
 
-    // 2. Sample 8 timestamps
-    final timestamps = customTimestamps ?? generateTimestamps(duration);
+    // 2. Sample N timestamps
+    final timestamps = customTimestamps ??
+        generateTimestamps(duration, frameCount: frameCount);
 
-    // 3. Extract 8 frames
+    // 3. Extract N frames
     final frames = await _extractor.extractFrames(
       videoPath: videoPath,
       videoBytes: videoBytes,
       timestamps: timestamps,
     );
 
-    if (frames.length < 8) {
+    if (frames.length < timestamps.length) {
       throw Exception('FAILED_FRAME_EXTRACTION');
     }
 
-    // 4. Compose 4x2 grid
+    // 4. Compose grid
     final gridBytes = await GridCompositor.composeGrid(
       frames: frames,
+      frameCount: frameCount,
       quality: quality,
       format: exportFormat,
     );
@@ -130,6 +139,7 @@ class VideoGridService {
       durationSeconds: duration,
       gridImagePath: '',
       timestamps: timestamps,
+      frameCount: frameCount,
       quality: quality,
       exportFormat: exportFormat,
       gridImageBytes: gridBytes,
@@ -139,16 +149,28 @@ class VideoGridService {
 
   Future<Project> regenerateProject({
     required Project project,
+    int? frameCount,
     String? quality,
     String? exportFormat,
+    bool isNewGenerate = false,
   }) async {
     final effectiveQuality = quality ?? project.quality;
     final effectiveFormat = exportFormat ?? project.exportFormat;
+    final effectiveFrameCount = frameCount ?? project.frameCount;
 
-    final newTimestamps = generateTimestamps(
-      project.durationSeconds,
-      previousTimestamps: project.timestamps,
-    );
+    final List<double> newTimestamps;
+    if (isNewGenerate || effectiveFrameCount != project.frameCount) {
+      newTimestamps = generateTimestamps(
+        project.durationSeconds,
+        frameCount: effectiveFrameCount,
+      );
+    } else {
+      newTimestamps = generateTimestamps(
+        project.durationSeconds,
+        frameCount: effectiveFrameCount,
+        previousTimestamps: project.timestamps,
+      );
+    }
 
     final frames = await _extractor.extractFrames(
       videoPath: project.videoPath,
@@ -156,8 +178,13 @@ class VideoGridService {
       timestamps: newTimestamps,
     );
 
+    if (frames.length < newTimestamps.length) {
+      throw Exception('FAILED_FRAME_EXTRACTION');
+    }
+
     final gridBytes = await GridCompositor.composeGrid(
       frames: frames,
+      frameCount: effectiveFrameCount,
       quality: effectiveQuality,
       format: effectiveFormat,
     );
@@ -171,6 +198,7 @@ class VideoGridService {
       durationSeconds: project.durationSeconds,
       gridImagePath: project.gridImagePath,
       timestamps: newTimestamps,
+      frameCount: effectiveFrameCount,
       quality: effectiveQuality,
       exportFormat: effectiveFormat,
       gridImageBytes: gridBytes,

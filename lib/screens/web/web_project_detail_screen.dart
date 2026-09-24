@@ -29,13 +29,15 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
   final TransformationController _transformController = TransformationController();
   bool _isProcessing = false;
   String? _statusMessage;
+  late int _selectedFrameCount;
   late String _selectedQuality;
 
   @override
   void initState() {
     super.initState();
     _project = widget.project;
-    _selectedQuality = widget.settingsService.gridQuality;
+    _selectedFrameCount = widget.project.frameCount;
+    _selectedQuality = widget.project.quality;
   }
 
   @override
@@ -44,18 +46,22 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
     super.dispose();
   }
 
-  Future<void> _regenerate() async {
+  Future<void> _changeFrameCount(int newCount) async {
+    if (newCount == _selectedFrameCount || _isProcessing) return;
     final l10n = AppLocalizations.of(context)!;
     setState(() {
+      _selectedFrameCount = newCount;
       _isProcessing = true;
-      _statusMessage = l10n.processingVideo;
+      _statusMessage = l10n.processingVideo(newCount);
     });
 
     try {
       final updated = await widget.videoGridService.regenerateProject(
         project: _project,
+        frameCount: newCount,
         quality: _selectedQuality,
         exportFormat: widget.settingsService.defaultExportFormat,
+        isNewGenerate: true,
       );
       await widget.projectService.saveProject(updated);
       if (mounted) {
@@ -63,7 +69,47 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
           _project = updated;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.framesExtracted)),
+          SnackBar(content: Text(l10n.framesExtracted(newCount))),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.exportFailed}: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _statusMessage = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _regenerate() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isProcessing = true;
+      _statusMessage = l10n.processingVideo(_selectedFrameCount);
+    });
+
+    try {
+      final updated = await widget.videoGridService.regenerateProject(
+        project: _project,
+        frameCount: _selectedFrameCount,
+        quality: _selectedQuality,
+        exportFormat: widget.settingsService.defaultExportFormat,
+        isNewGenerate: false,
+      );
+      await widget.projectService.saveProject(updated);
+      if (mounted) {
+        setState(() {
+          _project = updated;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.framesExtracted(_selectedFrameCount))),
         );
       }
     } catch (e) {
@@ -211,6 +257,7 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
   }
 
   Widget _buildImageViewer(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       children: [
         Center(
@@ -249,7 +296,7 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
                   const CircularProgressIndicator(color: AppTheme.primaryAccent),
                   const SizedBox(height: 16),
                   Text(
-                    _statusMessage ?? 'Processing...',
+                    _statusMessage ?? l10n.processingVideo(_selectedFrameCount),
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -264,45 +311,68 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.projectDetails, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        Text('${l10n.videoDuration}: ${_project.formattedDuration}', style: const TextStyle(fontSize: 13)),
-        const SizedBox(height: 4),
-        Text(
-          '${l10n.dateCreated}: ${_project.dateCreated.day}/${_project.dateCreated.month}/${_project.dateCreated.year}',
-          style: Theme.of(context).textTheme.bodySmall,
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.projectDetails, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Text('${l10n.videoDuration}: ${_project.formattedDuration}', style: const TextStyle(fontSize: 13)),
+                const SizedBox(height: 4),
+                Text(
+                  '${l10n.dateCreated}: ${_project.dateCreated.day}/${_project.dateCreated.month}/${_project.dateCreated.year}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const Divider(height: 24),
+                Text(l10n.framesExtracted(_project.frameCount), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: _project.timestamps.map((t) {
+                    final mins = t ~/ 60;
+                    final secs = (t % 60).toStringAsFixed(1);
+                    final label = '${mins.toString().padLeft(2, '0')}:${secs.padLeft(4, '0')}';
+                    return Chip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(label, style: const TextStyle(fontSize: 10)),
+                      backgroundColor: isDark ? AppTheme.darkCard : const Color(0xFFF0EFF4),
+                    );
+                  }).toList(),
+                ),
+                const Divider(height: 24),
+                Text(l10n.frameCount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 6),
+                SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(value: 4, label: Text('4')),
+                    ButtonSegment(value: 8, label: Text('8')),
+                    ButtonSegment(value: 16, label: Text('16')),
+                  ],
+                  selected: {_selectedFrameCount},
+                  onSelectionChanged: _isProcessing
+                      ? null
+                      : (set) => _changeFrameCount(set.first),
+                ),
+                const SizedBox(height: 14),
+                Text(l10n.exportQuality, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 6),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(value: 'standard', label: Text(l10n.standardQuality.split(' ').first)),
+                    ButtonSegment(value: 'high', label: Text(l10n.highQuality.split(' ').first)),
+                  ],
+                  selected: {_selectedQuality},
+                  onSelectionChanged: (set) {
+                    setState(() => _selectedQuality = set.first);
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
-        const Divider(height: 24),
-        Text(l10n.framesExtracted, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: _project.timestamps.map((t) {
-            final mins = t ~/ 60;
-            final secs = (t % 60).toStringAsFixed(1);
-            final label = '${mins.toString().padLeft(2, '0')}:${secs.padLeft(4, '0')}';
-            return Chip(
-              visualDensity: VisualDensity.compact,
-              label: Text(label, style: const TextStyle(fontSize: 10)),
-              backgroundColor: isDark ? AppTheme.darkCard : const Color(0xFFF0EFF4),
-            );
-          }).toList(),
-        ),
-        const Divider(height: 24),
-        Text(l10n.exportQuality, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        const SizedBox(height: 6),
-        SegmentedButton<String>(
-          segments: [
-            ButtonSegment(value: 'standard', label: Text(l10n.standardQuality.split(' ').first)),
-            ButtonSegment(value: 'high', label: Text(l10n.highQuality.split(' ').first)),
-          ],
-          selected: {_selectedQuality},
-          onSelectionChanged: (set) {
-            setState(() => _selectedQuality = set.first);
-          },
-        ),
-        const Spacer(),
+        const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           height: 42,
@@ -347,6 +417,7 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
   Widget _buildCompactControls(BuildContext context, AppLocalizations l10n, bool isDark) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -355,6 +426,62 @@ class _WebProjectDetailScreenState extends State<WebProjectDetailScreen> {
             Text(
               '${_project.dateCreated.day}/${_project.dateCreated.month}/${_project.dateCreated.year}',
               style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.framesExtracted(_project.frameCount),
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.frameCount,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment(value: 4, label: Text('4', style: TextStyle(fontSize: 12))),
+                      ButtonSegment(value: 8, label: Text('8', style: TextStyle(fontSize: 12))),
+                      ButtonSegment(value: 16, label: Text('16', style: TextStyle(fontSize: 12))),
+                    ],
+                    selected: {_selectedFrameCount},
+                    onSelectionChanged: _isProcessing
+                        ? null
+                        : (set) => _changeFrameCount(set.first),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.exportQuality,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  SegmentedButton<String>(
+                    segments: [
+                      ButtonSegment(value: 'standard', label: Text(l10n.standardQuality.split(' ').first, style: const TextStyle(fontSize: 12))),
+                      ButtonSegment(value: 'high', label: Text(l10n.highQuality.split(' ').first, style: const TextStyle(fontSize: 12))),
+                    ],
+                    selected: {_selectedQuality},
+                    onSelectionChanged: (set) {
+                      setState(() => _selectedQuality = set.first);
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),

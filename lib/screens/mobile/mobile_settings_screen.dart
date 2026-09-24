@@ -108,6 +108,21 @@ class MobileSettingsScreen extends StatelessWidget {
                         },
                       ),
                     ),
+                    ListTile(
+                      title: Text(l10n.defaultFrameCount),
+                      subtitle: Text(l10n.framesExtracted(settingsService.defaultFrameCount)),
+                      trailing: SegmentedButton<int>(
+                        segments: const [
+                          ButtonSegment(value: 4, label: Text('4')),
+                          ButtonSegment(value: 8, label: Text('8')),
+                          ButtonSegment(value: 16, label: Text('16')),
+                        ],
+                        selected: {settingsService.defaultFrameCount},
+                        onSelectionChanged: (set) {
+                          settingsService.setDefaultFrameCount(set.first);
+                        },
+                      ),
+                    ),
                     const Divider(height: 1),
                     ListTile(
                       title: Text(l10n.exportQuality),

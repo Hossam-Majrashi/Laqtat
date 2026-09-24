@@ -37,11 +37,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
       setState(() {
         _isProcessing = true;
-        _statusMessage = l10n.processingVideo;
+        _statusMessage = l10n.processingVideo(widget.settingsService.defaultFrameCount);
       });
 
       final project = await widget.videoGridService.processVideo(
         file: file,
+        frameCount: widget.settingsService.defaultFrameCount,
         quality: widget.settingsService.gridQuality,
         exportFormat: widget.settingsService.defaultExportFormat,
       );
@@ -205,7 +206,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 const CircularProgressIndicator(color: AppTheme.primaryAccent),
                 const SizedBox(height: 16),
                 Text(
-                  _statusMessage ?? l10n.processingVideo,
+                  _statusMessage ?? l10n.processingVideo(widget.settingsService.defaultFrameCount),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],

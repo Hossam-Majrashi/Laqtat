@@ -2,14 +2,27 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
 class GridCompositor {
+  static (int cols, int rows) getGridDimensions(int frameCount) {
+    if (frameCount == 4) {
+      return (2, 2);
+    } else if (frameCount == 16) {
+      return (4, 4);
+    } else {
+      return (4, 2);
+    }
+  }
+
   static Future<Uint8List> composeGrid({
     required List<Uint8List> frames,
+    int? frameCount,
     String quality = 'standard',
     String format = 'png',
   }) async {
+    final count = frameCount ?? frames.length;
     // Run in compute or background isolate to keep UI butter smooth
     return await compute(_composeGridTask, {
       'frames': frames,
+      'frameCount': count,
       'quality': quality,
       'format': format,
     });
@@ -19,14 +32,15 @@ class GridCompositor {
     final frames = args['frames'] as List<Uint8List>;
     final quality = args['quality'] as String? ?? 'standard';
     final format = args['format'] as String? ?? 'png';
+    final frameCount = args['frameCount'] as int? ??
+        (frames.length >= 16 ? 16 : (frames.length >= 8 ? 8 : 4));
 
     final isHigh = quality.toLowerCase() == 'high';
     final tileWidth = isHigh ? 960 : 480;
     final tileHeight = isHigh ? 540 : 270;
     final gap = isHigh ? 16 : 8;
 
-    const cols = 4;
-    const rows = 2;
+    final (cols, rows) = getGridDimensions(frameCount);
 
     final totalWidth = cols * tileWidth + (cols + 1) * gap;
     final totalHeight = rows * tileHeight + (rows + 1) * gap;
@@ -37,7 +51,7 @@ class GridCompositor {
 
     const targetAspect = 16.0 / 9.0;
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < frameCount; i++) {
       if (i >= frames.length) break;
 
       final frameBytes = frames[i];

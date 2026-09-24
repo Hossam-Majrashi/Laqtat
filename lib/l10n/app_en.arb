@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   "appName": "Laqtat",
-  "appDescription": "Extract 8 key frames from any video and assemble them into a stunning 4×2 grid image ready to export.",
+  "appDescription": "Extract key frames from any video and assemble them into a stunning grid image ready to export.",
   "next": "Next",
   "back": "Back",
   "getStarted": "Get Started",
@@ -25,6 +25,8 @@
   "exportQuality": "Grid Quality",
   "standardQuality": "Standard (Faster)",
   "highQuality": "High Resolution",
+  "frameCount": "Frame Count",
+  "defaultFrameCount": "Default Frame Count",
   "defaultExportFormat": "Default Export Format",
   "defaultSaveLocation": "Default Save Location",
   "systemDefault": "System Default",
@@ -38,9 +40,18 @@
   "deleteProject": "Delete Project",
   "deleteProjectConfirmation": "Are you sure you want to delete this project?",
   "noProjectsTitle": "No Projects Yet",
-  "noProjectsSubtitle": "Import a video to generate your first 4×2 frame grid",
-  "processingVideo": "Extracting 8 frames from video...",
-  "generatingGrid": "Assembling 4×2 grid...",
+  "noProjectsSubtitle": "Import a video to generate your first frame grid",
+  "processingVideo": "{count, plural, =1{Extracting 1 frame from video...} other{Extracting {count} frames from video...}}",
+  "@processingVideo": {
+    "description": "Status message while extracting frames",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "generatingGrid": "Assembling frame grid...",
   "exportSuccess": "Image saved to Gallery successfully",
   "exportFailed": "Failed to export image.",
   "unsupportedVideoFormat": "Unsupported video format. Please select a supported video file.",
@@ -49,7 +60,16 @@
   "videoDuration": "Duration",
   "dateCreated": "Created",
   "projectDetails": "Project Details",
-  "framesExtracted": "8 frames extracted",
+  "framesExtracted": "{count, plural, =1{1 frame extracted} other{{count} frames extracted}}",
+  "@framesExtracted": {
+    "description": "Number of frames extracted",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
   "aboutApp": "About Laqtat",
   "version": "Version",
   "offlineNote": "100% Offline & Private: No video or data ever leaves your device.",

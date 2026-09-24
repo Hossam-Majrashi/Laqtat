@@ -14,7 +14,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appDescription =>
-      'Extract 8 key frames from any video and assemble them into a stunning 4×2 grid image ready to export.';
+      'Extract key frames from any video and assemble them into a stunning grid image ready to export.';
 
   @override
   String get next => 'Next';
@@ -89,6 +89,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get highQuality => 'High Resolution';
 
   @override
+  String get frameCount => 'Frame Count';
+
+  @override
+  String get defaultFrameCount => 'Default Frame Count';
+
+  @override
   String get defaultExportFormat => 'Default Export Format';
 
   @override
@@ -131,13 +137,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noProjectsSubtitle =>
-      'Import a video to generate your first 4×2 frame grid';
+      'Import a video to generate your first frame grid';
 
   @override
-  String get processingVideo => 'Extracting 8 frames from video...';
+  String processingVideo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Extracting $count frames from video...',
+      one: 'Extracting 1 frame from video...',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String get generatingGrid => 'Assembling 4×2 grid...';
+  String get generatingGrid => 'Assembling frame grid...';
 
   @override
   String get exportSuccess => 'Image saved to Gallery successfully';
@@ -167,7 +181,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectDetails => 'Project Details';
 
   @override
-  String get framesExtracted => '8 frames extracted';
+  String framesExtracted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count frames extracted',
+      one: '1 frame extracted',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get aboutApp => 'About Laqtat';

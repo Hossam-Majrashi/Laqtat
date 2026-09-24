@@ -146,6 +146,36 @@ class WebSettingsScreen extends StatelessWidget {
                               ),
                             ],
                           ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.defaultFrameCount,
+                                      style: const TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      l10n.framesExtracted(settingsService.defaultFrameCount),
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SegmentedButton<int>(
+                                segments: const [
+                                  ButtonSegment(value: 4, label: Text('4')),
+                                  ButtonSegment(value: 8, label: Text('8')),
+                                  ButtonSegment(value: 16, label: Text('16')),
+                                ],
+                                selected: {settingsService.defaultFrameCount},
+                                onSelectionChanged: (set) {
+                                  settingsService.setDefaultFrameCount(set.first);
+                                },
+                              ),
+                            ],
+                          ),
                           const Divider(height: 24),
                           Row(
                             children: [

@@ -98,6 +98,7 @@ class ProjectService extends ChangeNotifier {
           durationSeconds: project.durationSeconds,
           gridImagePath: imgFile.path,
           timestamps: project.timestamps,
+          frameCount: project.frameCount,
           quality: project.quality,
           exportFormat: project.exportFormat,
           gridImageBytes: project.gridImageBytes,

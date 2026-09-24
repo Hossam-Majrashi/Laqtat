@@ -30,6 +30,7 @@ class _DesktopProjectDetailScreenState extends State<DesktopProjectDetailScreen>
   final TransformationController _transformController = TransformationController();
   bool _isProcessing = false;
   String? _statusMessage;
+  late int _selectedFrameCount;
   late String _selectedQuality;
   late String _selectedFormat;
 
@@ -37,7 +38,8 @@ class _DesktopProjectDetailScreenState extends State<DesktopProjectDetailScreen>
   void initState() {
     super.initState();
     _project = widget.project;
-    _selectedQuality = widget.settingsService.gridQuality;
+    _selectedFrameCount = widget.project.frameCount;
+    _selectedQuality = widget.project.quality;
     _selectedFormat = widget.settingsService.defaultExportFormat;
   }
 
@@ -47,18 +49,22 @@ class _DesktopProjectDetailScreenState extends State<DesktopProjectDetailScreen>
     super.dispose();
   }
 
-  Future<void> _regenerate() async {
+  Future<void> _changeFrameCount(int newCount) async {
+    if (newCount == _selectedFrameCount || _isProcessing) return;
     final l10n = AppLocalizations.of(context)!;
     setState(() {
+      _selectedFrameCount = newCount;
       _isProcessing = true;
-      _statusMessage = l10n.processingVideo;
+      _statusMessage = l10n.processingVideo(newCount);
     });
 
     try {
       final updated = await widget.videoGridService.regenerateProject(
         project: _project,
+        frameCount: newCount,
         quality: _selectedQuality,
         exportFormat: _selectedFormat,
+        isNewGenerate: true,
       );
       await widget.projectService.saveProject(updated);
       if (mounted) {
@@ -66,7 +72,47 @@ class _DesktopProjectDetailScreenState extends State<DesktopProjectDetailScreen>
           _project = updated;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.framesExtracted)),
+          SnackBar(content: Text(l10n.framesExtracted(newCount))),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.exportFailed}: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _statusMessage = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _regenerate() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isProcessing = true;
+      _statusMessage = l10n.processingVideo(_selectedFrameCount);
+    });
+
+    try {
+      final updated = await widget.videoGridService.regenerateProject(
+        project: _project,
+        frameCount: _selectedFrameCount,
+        quality: _selectedQuality,
+        exportFormat: _selectedFormat,
+        isNewGenerate: false,
+      );
+      await widget.projectService.saveProject(updated);
+      if (mounted) {
+        setState(() {
+          _project = updated;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.framesExtracted(_selectedFrameCount))),
         );
       }
     } catch (e) {
@@ -248,7 +294,7 @@ class _DesktopProjectDetailScreenState extends State<DesktopProjectDetailScreen>
                                 const CircularProgressIndicator(color: AppTheme.primaryAccent),
                                 const SizedBox(height: 16),
                                 Text(
-                                  _statusMessage ?? l10n.processingVideo,
+                                  _statusMessage ?? l10n.processingVideo(_selectedFrameCount),
                                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                                 ),
                               ],
@@ -275,57 +321,83 @@ class _DesktopProjectDetailScreenState extends State<DesktopProjectDetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.projectDetails,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.projectDetails,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildInfoRow(Icons.movie_outlined, l10n.appName, _project.videoName),
+                            const SizedBox(height: 10),
+                            _buildInfoRow(Icons.timer_outlined, l10n.videoDuration, _project.formattedDuration),
+                            const SizedBox(height: 10),
+                            _buildInfoRow(
+                              Icons.calendar_today_outlined,
+                              l10n.dateCreated,
+                              '${_project.dateCreated.day}/${_project.dateCreated.month}/${_project.dateCreated.year}',
+                            ),
+                            const Divider(height: 32),
+                            Text(
+                              l10n.framesExtracted(_project.frameCount),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _project.timestamps.map((t) {
+                                final mins = t ~/ 60;
+                                final secs = (t % 60).toStringAsFixed(1);
+                                final label = '${mins.toString().padLeft(2, '0')}:${secs.padLeft(4, '0')}';
+                                return Chip(
+                                  visualDensity: VisualDensity.compact,
+                                  label: Text(label, style: const TextStyle(fontSize: 11)),
+                                  backgroundColor: isDark ? AppTheme.darkCard : const Color(0xFFF0EFF4),
+                                );
+                              }).toList(),
+                            ),
+                            const Divider(height: 24),
+                            Text(
+                              l10n.frameCount,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 8),
+                            SegmentedButton<int>(
+                              segments: const [
+                                ButtonSegment(value: 4, label: Text('4')),
+                                ButtonSegment(value: 8, label: Text('8')),
+                                ButtonSegment(value: 16, label: Text('16')),
+                              ],
+                              selected: {_selectedFrameCount},
+                              onSelectionChanged: _isProcessing
+                                  ? null
+                                  : (set) => _changeFrameCount(set.first),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.exportQuality,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 8),
+                            SegmentedButton<String>(
+                              segments: [
+                                ButtonSegment(value: 'standard', label: Text(l10n.standardQuality.split(' ').first)),
+                                ButtonSegment(value: 'high', label: Text(l10n.highQuality.split(' ').first)),
+                              ],
+                              selected: {_selectedQuality},
+                              onSelectionChanged: (set) {
+                                setState(() => _selectedQuality = set.first);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.movie_outlined, l10n.appName, _project.videoName),
-                    const SizedBox(height: 10),
-                    _buildInfoRow(Icons.timer_outlined, l10n.videoDuration, _project.formattedDuration),
-                    const SizedBox(height: 10),
-                    _buildInfoRow(
-                      Icons.calendar_today_outlined,
-                      l10n.dateCreated,
-                      '${_project.dateCreated.day}/${_project.dateCreated.month}/${_project.dateCreated.year}',
-                    ),
-                    const Divider(height: 32),
-                    Text(
-                      l10n.framesExtracted,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _project.timestamps.map((t) {
-                        final mins = t ~/ 60;
-                        final secs = (t % 60).toStringAsFixed(1);
-                        final label = '${mins.toString().padLeft(2, '0')}:${secs.padLeft(4, '0')}';
-                        return Chip(
-                          visualDensity: VisualDensity.compact,
-                          label: Text(label, style: const TextStyle(fontSize: 11)),
-                          backgroundColor: isDark ? AppTheme.darkCard : const Color(0xFFF0EFF4),
-                        );
-                      }).toList(),
-                    ),
-                    const Divider(height: 32),
-                    Text(
-                      l10n.exportQuality,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    const SizedBox(height: 8),
-                    SegmentedButton<String>(
-                      segments: [
-                        ButtonSegment(value: 'standard', label: Text(l10n.standardQuality.split(' ').first)),
-                        ButtonSegment(value: 'high', label: Text(l10n.highQuality.split(' ').first)),
-                      ],
-                      selected: {_selectedQuality},
-                      onSelectionChanged: (set) {
-                        setState(() => _selectedQuality = set.first);
-                      },
-                    ),
-                    const Spacer(),
                     // Regenerate Action
                     SizedBox(
                       width: double.infinity,
